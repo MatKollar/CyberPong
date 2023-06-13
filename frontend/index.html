@@ -1,0 +1,196 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="./css/lobby.css" />
+    <link rel="stylesheet" href="./css/cyber.css" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <script src="
+https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js
+"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ"
+      crossorigin="anonymous"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap"
+      rel="stylesheet"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+      crossorigin="anonymous"
+    ></script>
+    <title>Pong</title>
+  </head>
+  <body>
+    <div id="app">
+      <audio id="menu-music" loop>
+        <source src="./songs/V_Menu.mp3" type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
+
+      <audio id="game-music" loop>
+        <source src="./songs/The_rebel_path.mp3" type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
+
+      <audio id="game-over-music" loop>
+        <source src="./songs/game_over.mp3" type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
+
+      <div style="position: fixed; top: 20px; right: 20px">
+        <button
+          onclick="toggleMute()"
+          style="background: transparent; color: fdf800; border: none; font-size: 3rem"
+        >
+          <i id="muteIcon" class="fas fa-volume-mute"></i>
+        </button>
+      </div>
+
+      <div :class="{'flex-column': state === 'game'}">
+        <div v-if="state === 'form'" class="menu">
+          <h1 class="title hero glitch layers"><span>CYBER PONG</span></h1>
+          <h3 class="hero glitch layers"><span>2077</span></h3>
+          <div class="wrapper">
+            <h2>Online players: {{ playerCount }}</h2>
+            <p>Enter your Name</p>
+            <input
+              class="form-control"
+              type="text"
+              name="name"
+              id="name"
+              v-model="name"
+              placeholder="Name"
+            />
+            <button
+              class="cybr-btn"
+              v-on:click="queueUp"
+              v-if="!gameInProgress"
+              :disabled="!name"
+            >
+              JOIN<span aria-hidden></span>
+              <span aria-hidden class="cybr-btn__glitch">JOIN</span>
+              <span aria-hidden class="cybr-btn__tag">FEI STU</span>
+            </button>
+            <div class="wait" v-if="gameInProgress">WAIT GAME IS IN PROGRESS</div>
+          </div>
+        </div>
+
+        <div id="queue" v-else-if="state === 'queue'">
+          <div class="lobby">
+            <h1>PLAYERS WAITING:</h1>
+
+            <section class="players">
+              <div
+                class="player-container"
+                role="group"
+                aria-label="Color Theme"
+                tabindex="0"
+                v-for="(name, index) in queuedNames"
+                :key="index"
+              >
+                <button
+                  role="radio"
+                  :aria-checked="player && name === player.name ? 'true' : 'false'"
+                  tabindex="0"
+                  data-augmented-ui
+                  :data-player="name"
+                >
+                  {{ name }}
+                </button>
+              </div>
+            </section>
+
+            <button v-if="rank === 1" class="cybr-btn" v-on:click="startGame">
+              START<span aria-hidden></span>
+              <span aria-hidden class="cybr-btn__glitch">START</span>
+              <span aria-hidden class="cybr-btn__tag">FEI STU</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="game" v-else-if="state === 'game'">
+          <h2>LIVES: {{ player.hp ? player.hp.health : 0 }}</h2>
+          <h2>SCORE: {{ score }}</h2>
+        </div>
+
+        <div class="game-over" v-else-if="state === 'gameOver'">
+          <h1 class="title hero glitch layers"><span>Game Over</span></h1>
+          <h2 class="placing">Placing: {{ placing }}</h2>
+          <button v-on:click="restart" class="cybr-btn" v-on:click="queueUp">
+            PLAY AGAIN<span aria-hidden></span>
+            <span aria-hidden class="cybr-btn__glitch">PLAY AGAIN</span>
+            <span aria-hidden class="cybr-btn__tag">FEI STU</span>
+          </button>
+        </div>
+
+        <canvas
+          :class="{'invisibleCanvas': state !== 'game'}"
+          id="canvas"
+          width="600"
+          height="600"
+        ></canvas>
+      </div>
+    </div>
+    <script>
+      const menuMusic = document.getElementById("menu-music");
+      const gameMusic = document.getElementById("game-music");
+      const gameOverMusic = document.getElementById("game-over-music");
+      let currentMusic = menuMusic;
+      let isMuted = true;
+
+      function toggleMute() {
+        isMuted = !isMuted;
+        currentMusic.muted = isMuted;
+
+        const muteIcon = document.getElementById("muteIcon");
+        if (isMuted) {
+          muteIcon.classList.remove("fa-volume-up");
+          muteIcon.classList.add("fa-volume-mute");
+        } else {
+          muteIcon.classList.remove("fa-volume-mute");
+          muteIcon.classList.add("fa-volume-up");
+          if (currentMusic.paused) {
+            currentMusic.play();
+          }
+        }
+      }
+
+      function playMusic(state) {
+        currentMusic.pause();
+
+        if (state === "menu" || state === "lobby") {
+          currentMusic = menuMusic;
+        } else if (state === "game") {
+          currentMusic = gameMusic;
+        } else if (state === "gameOver") {
+          currentMusic = gameOverMusic;
+        }
+
+        currentMusic.currentTime = 0;
+        if (!isMuted) {
+          currentMusic.play();
+        }
+      }
+    </script>
+
+    <script type="module" src="js/Ball.js"></script>
+    <script type="module" src="js/Paddle.js"></script>
+    <script type="module" src="js/Game.js"></script>
+    <script type="module" src="js/App.js"></script>
+  </body>
+</html>

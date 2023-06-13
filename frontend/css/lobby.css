@@ -1,0 +1,106 @@
+@import "https://unpkg.com/augmented-ui@2.0.0/aug-core.min.css";
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  --palletHR: 0deg;
+  --pallet1: #131323;
+  --pallet2: #551512;
+  --pallet3: #ff4e3b;
+  --pallet4: #00edff;
+  background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px 0.3vh,
+      rgba(0, 0, 0, 0.25) 0.3vh 0.5vh
+    ),
+    radial-gradient(at center top, var(--pallet3), transparent 75%) center -50vh / 200vw 150vh
+      no-repeat fixed,
+    var(--pallet1);
+}
+
+#card-23,
+#card-24 {
+  filter: hue-rotate(var(--palletHR));
+}
+
+h1 {
+  color: var(--pallet4);
+  --ts: 0 0 2vw var(--pallet1);
+  text-shadow: var(--ts), var(--ts), var(--ts);
+  text-align: center;
+  font-size: 3vw;
+  font-weight: bold;
+  margin-top: 2vw;
+}
+
+.lobby {
+  margin-top: 15rem;
+  text-align: center;
+  color: #fdf800;
+}
+
+.lobby > h1 {
+  margin-bottom: 4rem;
+}
+
+.players {
+  display: flex;
+  align-items: center;
+  margin-top: 2vw;
+}
+
+.player-container {
+  margin: 0 auto;
+}
+
+[role="group"] [role="radio"] {
+  background: linear-gradient(
+    to right,
+    transparent 0px 1vw,
+    currentColor 1vw 1.125vw,
+    transparent 1.125vw
+  );
+  color: var(--pallet3);
+  width: 20vw;
+  margin: 1vw;
+  border: none;
+  outline: none;
+  padding: 2.5vw 2vw;
+  padding-left: 3.5vw;
+  font-size: 2vw;
+  --aug-border: initial;
+  --aug-border-all: 0.125vw;
+  --aug-inlay: initial;
+  --aug-inlay-all: 0px;
+  --aug-inlay-bg: var(--pallet1);
+  --aug-inlay-opacity: 0.75;
+  --aug-clip-tr1: initial;
+  --aug-clip-br1: initial;
+  --aug-tr1: 0.5vw;
+  --aug-tr-inset2: 70%;
+  --aug-tr1-alt-join-out: initial;
+  --aug-br1: 1.5vw;
+  --aug-rect-l1: initial;
+  --aug-rect-l2: initial;
+  --aug-l1: 0.25vw;
+  --aug-l2: 0.25vw;
+  --aug-l-extend1: 1vw;
+  --aug-l-center: 70%;
+}
+[role="group"] [role="radio"]:is(:hover, [aria-checked="true"]) {
+  --aug-border-bg: var(--pallet4);
+  color: var(--pallet4);
+}
+[role="group"] [role="radio"]:is(:hover, ) {
+  --aug-inlay-bg: radial-gradient(var(--pallet1), var(--pallet4) 200%);
+}
+
+@media (max-width: 1550px) {
+  .lobby {
+    margin-top: 10rem;
+  }
+}
