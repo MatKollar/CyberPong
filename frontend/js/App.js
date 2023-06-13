@@ -20,7 +20,7 @@ const app = createApp({
   },
 
   created() {
-    socket = new WebSocket("wss://site125.webte.fei.stuba.sk/zadanie3/backend");
+    socket = new WebSocket("ws:/localhost:9000/backend");
     window.socket = socket;
 
     socket.onmessage = (event) => {
